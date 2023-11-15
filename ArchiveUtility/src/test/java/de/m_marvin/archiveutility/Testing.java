@@ -7,28 +7,30 @@ public class Testing {
 
 	public static void main(String... test) throws IOException {
 		
-		System.out.println(ArchiveUtility.getArchivePath());;
-		System.out.println(ArchiveUtility.isInArchive() ? "In Archive" : "In Folder");
+		ArchiveUtility utility = new ArchiveUtility(Testing.class);
+		
+		System.out.println(utility.getArchivePath());;
+		System.out.println(utility.isInArchive() ? "In Archive" : "In Folder");
 
-		for (String item : ArchiveUtility.list("test/")) {
+		for (String item : utility.list("test/")) {
 			
 			System.out.println("-> " + item);
 			
 		}
 		System.out.println("---");
-		for (String item : ArchiveUtility.listFiles("test/")) {
+		for (String item : utility.listFiles("test/")) {
 			
 			System.out.println("-> " + item);
 			
 		}
 		System.out.println("---");
-		for (String item : ArchiveUtility.listFolders("test/")) {
+		for (String item : utility.listFolders("test/")) {
 			
 			System.out.println("-> " + item);
 			
 		}
 		
-		InputStream is = ArchiveUtility.openFile("test/subfolder/test2.txt");
+		InputStream is = utility.openFile("test/subfolder/test2.txt");
 		System.out.println(is);
 		is.close();
 	}

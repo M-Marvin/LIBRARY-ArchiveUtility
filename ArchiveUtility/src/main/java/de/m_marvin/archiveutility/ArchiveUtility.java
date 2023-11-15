@@ -12,52 +12,57 @@ import java.util.zip.ZipFile;
 
 public class ArchiveUtility {
 	
-	private static boolean inArchive = false;
-	private static File archivePath = null;
+	private boolean inArchive = false;
+	private File archivePath = null;
 	
-	static {
+	public ArchiveUtility(File archivePath) {
+		this.archivePath = archivePath;
+		this.inArchive = archivePath.isFile();
+	}
+	
+	public ArchiveUtility(Class<?> referenceClass) {
 		try {
-			archivePath = new File(ArchiveUtility.class.getProtectionDomain().getCodeSource().getLocation().toURI());
-			inArchive = archivePath.isFile();
+			this.archivePath = new File(referenceClass.getProtectionDomain().getCodeSource().getLocation().toURI());
+			this.inArchive = archivePath.isFile();
 		} catch (URISyntaxException e) {
 			e.printStackTrace();
 		}
 	}
 	
-	public static boolean isInArchive() {
+	public boolean isInArchive() {
 		return inArchive;
 	}
 	
-	public static File getArchivePath() {
+	public File getArchivePath() {
 		return archivePath;
 	}
 	
-	private static String cleanPath(String path) {
+	private String cleanPath(String path) {
 		if (path == null || path.isEmpty()) return "";
 		if (path.endsWith("/")) path = path.substring(0, path.length() - 1);
 		if (path.startsWith("/")) path = path.substring(1);
 		return path;
 	}
 	
-	public static String getParent(String path) {
+	public String getParent(String path) {
 		String p = cleanPath(path);
 		int i = p.lastIndexOf("/");
 		return i > 0 ? p.substring(0, i) : "";
 	}
 	
-	public static String getChild(String path, String file) {
+	public String getChild(String path, String file) {
 		return cleanPath(path) + "/" + file;
 	}
 	
-	public static String getName(String path) {
+	public String getName(String path) {
 		String p = cleanPath(path);
 		int i = p.lastIndexOf("/");
 		return i > 0 ? p.substring(i + 1, p.length()) : "";
 	}
 	
-	public static final Map<String, Boolean> path2isFileMap = new HashMap<>();
+	public final Map<String, Boolean> path2isFileMap = new HashMap<>();
 	
-	public static boolean isFile(String path) {
+	public boolean isFile(String path) {
 		String p = cleanPath(path);
 		if (!path2isFileMap.containsKey(p)) {
 			
@@ -82,19 +87,19 @@ public class ArchiveUtility {
 		return path2isFileMap.get(p);
 	}
 	
-	public static boolean isFolder(String path) {
+	public boolean isFolder(String path) {
 		return !isFile(path);
 	}
 	
-	public static boolean arePathsEqual(String pathA, String pathB) {
+	public boolean arePathsEqual(String pathA, String pathB) {
 		if (pathA == null || pathB == null) return false;
 		if (pathA == pathB) return true;
 		return cleanPath(pathA).equalsIgnoreCase(cleanPath(pathB));
 	}
 	
-	private static final Map<String, String[]> path2childMap = new HashMap<>();
+	private final Map<String, String[]> path2childMap = new HashMap<>();
 	
-	public static String[] list(String path) {
+	public String[] list(String path) {
 		
 		String p = cleanPath(path);
 		if (!path2childMap.containsKey(p)) {
@@ -120,7 +125,7 @@ public class ArchiveUtility {
 							archive.stream()
 							.map(ZipEntry::getName)
 							.filter(fp -> arePathsEqual(getParent(fp), path))
-							.map(ArchiveUtility::getName)
+							.map(this::getName)
 							.toArray(i -> new String[i]));
 					
 					archive.close();
@@ -136,7 +141,7 @@ public class ArchiveUtility {
 		return path2childMap.get(p);
 	}
 	
-	public static String[] listFiles(String path) {
+	public String[] listFiles(String path) {
 		return Stream.of(list(path))
 				.map(fp -> getChild(path, fp))
 				.filter(fp -> isFile(fp))
@@ -144,7 +149,7 @@ public class ArchiveUtility {
 				.toArray(i -> new String[i]);
 	}
 	
-	public static String[] listFolders(String path) {
+	public String[] listFolders(String path) {
 		return Stream.of(list(path))
 				.map(fp -> getChild(path, fp))
 				.filter(fp -> isFolder(fp))
@@ -152,7 +157,7 @@ public class ArchiveUtility {
 				.toArray(i -> new String[i]);
 	}
 	
-	public static InputStream openFile(String path) {
+	public InputStream openFile(String path) {
 		if (!isFile(path)) return null;
 		return ArchiveUtility.class.getResourceAsStream("/" + cleanPath(path));
 	}
