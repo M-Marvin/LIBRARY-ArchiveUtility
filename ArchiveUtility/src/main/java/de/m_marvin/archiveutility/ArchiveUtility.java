@@ -1,6 +1,8 @@
 package de.m_marvin.archiveutility;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
@@ -14,6 +16,7 @@ public class ArchiveUtility {
 	
 	private boolean inArchive = false;
 	private File archivePath = null;
+	private ZipFile archive = null;
 	
 	public ArchiveUtility(File archivePath) {
 		this.archivePath = archivePath;
@@ -38,6 +41,7 @@ public class ArchiveUtility {
 	}
 	
 	private String cleanPath(String path) {
+		path = path.replace('\\', '/');
 		if (path == null || path.isEmpty()) return "";
 		if (path.endsWith("/")) path = path.substring(0, path.length() - 1);
 		if (path.startsWith("/")) path = path.substring(1);
@@ -71,10 +75,9 @@ public class ArchiveUtility {
 			} else {
 
 				try {
-					ZipFile archive = new ZipFile(archivePath);
-					ZipEntry entry = archive.getEntry(p);
+					if (this.archive == null) this.archive = new ZipFile(archivePath);
+					ZipEntry entry = this.archive.getEntry(p);
 					path2isFileMap.put(p, !entry.isDirectory());
-					archive.close();
 				} catch (IOException e) {
 					e.printStackTrace();
 					return false;
@@ -113,22 +116,19 @@ public class ArchiveUtility {
 			} else {
 				
 				try {
-					ZipFile archive = new ZipFile(archivePath);
-					
-					ZipEntry entry = archive.getEntry(path);
+					if (this.archive == null) this.archive = new ZipFile(archivePath);
+					ZipEntry entry = this.archive.getEntry(p);
 					if (!entry.isDirectory()) {
-						archive.close();
 						path2childMap.put(p, new String[0]);
 					};
 					
 					path2childMap.put(p, 
-							archive.stream()
+							this.archive.stream()
 							.map(ZipEntry::getName)
 							.filter(fp -> arePathsEqual(getParent(fp), path))
 							.map(this::getName)
 							.toArray(i -> new String[i]));
 					
-					archive.close();
 				} catch (IOException e) {
 					e.printStackTrace();
 					return new String[0];
@@ -159,7 +159,37 @@ public class ArchiveUtility {
 	
 	public InputStream openFile(String path) {
 		if (!isFile(path)) return null;
-		return ArchiveUtility.class.getResourceAsStream("/" + cleanPath(path));
+		
+		String p = cleanPath(path);
+
+		if (!isInArchive()) {
+			File filePath = new File(getArchivePath(), path);
+			if (!filePath.isFile()) return null;
+			
+			try {
+				return new FileInputStream(filePath);
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+				return null;
+			}
+			
+		} else {
+			
+			try {
+				if (this.archive == null) this.archive = new ZipFile(archivePath);
+				
+				ZipEntry entry = this.archive.getEntry(p);
+				if (entry.isDirectory()) {
+					return null;
+				}
+				
+				return this.archive.getInputStream(entry);
+			} catch (IOException e) {
+				e.printStackTrace();
+				return null;
+			}
+			
+		}
 	}
 	
 }
