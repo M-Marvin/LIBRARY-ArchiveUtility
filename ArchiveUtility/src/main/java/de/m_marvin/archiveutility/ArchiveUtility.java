@@ -27,6 +27,10 @@ public class ArchiveUtility {
 		try {
 			this.archivePath = new File(referenceClass.getProtectionDomain().getCodeSource().getLocation().toURI());
 			this.inArchive = archivePath.isFile();
+			if (!this.isInArchive()) {
+				// This lib is used to access resources, and for some reason they are located in an separate folder when runnin in IDE
+				this.archivePath = new File(this.archivePath.getParentFile(), "default");
+			}
 		} catch (URISyntaxException e) {
 			e.printStackTrace();
 		}
