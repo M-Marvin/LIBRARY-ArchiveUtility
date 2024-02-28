@@ -77,7 +77,7 @@ public class ArchiveUtility {
 				try {
 					if (this.archive == null) this.archive = new ZipFile(archivePath);
 					ZipEntry entry = this.archive.getEntry(p);
-					path2isFileMap.put(p, !entry.isDirectory());
+					path2isFileMap.put(p, entry != null && !entry.isDirectory());
 				} catch (IOException e) {
 					e.printStackTrace();
 					return false;
@@ -118,7 +118,7 @@ public class ArchiveUtility {
 				try {
 					if (this.archive == null) this.archive = new ZipFile(archivePath);
 					ZipEntry entry = this.archive.getEntry(p);
-					if (!entry.isDirectory()) {
+					if (entry == null || !entry.isDirectory()) {
 						path2childMap.put(p, new String[0]);
 					};
 					
@@ -179,7 +179,7 @@ public class ArchiveUtility {
 				if (this.archive == null) this.archive = new ZipFile(archivePath);
 				
 				ZipEntry entry = this.archive.getEntry(p);
-				if (entry.isDirectory()) {
+				if (entry == null || entry.isDirectory()) {
 					return null;
 				}
 				
