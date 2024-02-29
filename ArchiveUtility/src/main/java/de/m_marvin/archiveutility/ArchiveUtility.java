@@ -106,7 +106,7 @@ public class ArchiveUtility {
 			
 		}
 		
-		return path2isFileMap.get(p);
+		return path2isFileMap.containsKey(p) ? path2isFileMap.get(p) : false;
 	}
 	
 	public boolean isFolder(String path) {
