@@ -16,21 +16,24 @@ public class ArchiveUtility {
 	
 	private boolean inArchive = false;
 	private File archivePath = null;
+	private boolean runsInIDE = false;
 	private ZipFile archive = null;
 	
 	public ArchiveUtility(File archivePath) {
 		this.archivePath = archivePath;
 		this.inArchive = archivePath.isFile();
+		this.runsInIDE = this.archivePath.getPath().endsWith("bin/main");
 	}
+	
+	public boolean runsInIDE() {
+		return runsInIDE;
+	} 
 	
 	public ArchiveUtility(Class<?> referenceClass) {
 		try {
 			this.archivePath = new File(referenceClass.getProtectionDomain().getCodeSource().getLocation().toURI());
 			this.inArchive = archivePath.isFile();
-			if (!this.isInArchive()) {
-				// This lib is used to access resources, and for some reason they are located in an separate folder when runnin in IDE
-				this.archivePath = new File(this.archivePath.getParentFile(), "default");
-			}
+			this.runsInIDE = this.archivePath.getPath().endsWith("bin\\main") || this.archivePath.getPath().endsWith("bin\\test");
 		} catch (URISyntaxException e) {
 			e.printStackTrace();
 		}
@@ -75,9 +78,21 @@ public class ArchiveUtility {
 		if (!path2isFileMap.containsKey(p)) {
 			
 			if (!isInArchive()) {
-				path2isFileMap.put(p, new File(archivePath, path).isFile());
+				if (runsInIDE()) {
+					File binDir = this.archivePath.getParentFile();
+					for (String entry : binDir.list()) {
+						File folder = new File(binDir, entry);
+						File file = new File(folder, path);
+						if (folder.isDirectory() && file.exists()) {
+							path2isFileMap.put(p, file.isFile());
+							break;
+						}
+					}
+				} else {
+					path2isFileMap.put(p, new File(archivePath, path).isFile());
+				}
 			} else {
-
+				
 				try {
 					if (this.archive == null) this.archive = new ZipFile(archivePath);
 					ZipEntry entry = this.archive.getEntry(p);
@@ -112,11 +127,28 @@ public class ArchiveUtility {
 		if (!path2childMap.containsKey(p)) {
 			
 			if (!isInArchive()) {
-				File folderPath = new File(getArchivePath(), path);
-				if (!folderPath.isDirectory())
-					path2childMap.put(p, new String[0]);
-				else
-					path2childMap.put(p, folderPath.list());
+				
+				if (runsInIDE()) {
+					File binDir = this.archivePath.getParentFile();
+					for (String entry : binDir.list()) {
+						File folder = new File(binDir, entry);
+						File folderPath = new File(folder, path);
+						if (folder.isDirectory() && folderPath.exists()) {
+							if (!folderPath.isDirectory())
+								path2childMap.put(p, new String[0]);
+							else
+								path2childMap.put(p, folderPath.list());
+							break;
+						}
+					}
+				} else {
+					File folderPath = new File(getArchivePath(), path);
+					if (!folderPath.isDirectory())
+						path2childMap.put(p, new String[0]);
+					else
+						path2childMap.put(p, folderPath.list());
+				}
+				
 			} else {
 				
 				try {
@@ -167,16 +199,35 @@ public class ArchiveUtility {
 		String p = cleanPath(path);
 
 		if (!isInArchive()) {
-			File filePath = new File(getArchivePath(), path);
-			if (!filePath.isFile()) return null;
 			
-			try {
-				return new FileInputStream(filePath);
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
+			if (runsInIDE()) {
+				File binDir = this.archivePath.getParentFile();
+				for (String entry : binDir.list()) {
+					File folder = new File(binDir, entry);
+					File filePath = new File(folder, path);
+					if (folder.isDirectory() && filePath.exists()) {
+						if (!filePath.isFile()) return null;
+						
+						try {
+							return new FileInputStream(filePath);
+						} catch (FileNotFoundException e) {
+							e.printStackTrace();
+							return null;
+						}
+					}
+				}
 				return null;
+			} else {
+				File filePath = new File(getArchivePath(), path);
+				if (!filePath.isFile()) return null;
+				
+				try {
+					return new FileInputStream(filePath);
+				} catch (FileNotFoundException e) {
+					e.printStackTrace();
+					return null;
+				}
 			}
-			
 		} else {
 			
 			try {
