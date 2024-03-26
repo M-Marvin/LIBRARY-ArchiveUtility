@@ -174,7 +174,7 @@ public class ArchiveUtility {
 			
 		}
 		
-		return path2childMap.get(p);
+		return path2childMap.containsKey(p) ? path2childMap.get(p) : new String[0];
 	}
 	
 	public String[] listFiles(String path) {
