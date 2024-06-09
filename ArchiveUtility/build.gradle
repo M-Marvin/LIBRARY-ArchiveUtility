@@ -3,7 +3,7 @@ apply plugin: 'java'
 apply plugin: 'maven-publish'
 
 group = 'com.github.M-Marvin'
-version = '1.0'
+version = '2.0'
 
 jar {
     manifest {
@@ -15,9 +15,9 @@ jar {
 
 java {
     withSourcesJar()
+	sourceCompatibility = "1.17"
+	targetCompatibility = "1.17"
 }
-
-java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 publishing {
     publications {
