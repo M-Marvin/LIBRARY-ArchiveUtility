@@ -44,6 +44,7 @@ public class ZipFileAccess implements IArchiveAccess {
 	@Override
 	public String[] listFull() {
 		return this.zip.stream()
+				.filter(z -> !z.isDirectory())
 				.map(ZipEntry::getName)
 				.map(ZipFileAccess::formatFileSystem)
 				.toArray(i -> new String[i]);
