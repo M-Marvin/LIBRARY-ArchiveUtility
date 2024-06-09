@@ -3,6 +3,8 @@ package de.m_marvin.archiveutility;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
@@ -23,10 +25,13 @@ public class ArchiveAccess {
 	
 	public static IArchiveAccess getClasspathAccess() throws IOException {
 		String[] classpath = ((String) System.getProperty("java.class.path")).split(";");
-		IArchiveAccess[] access = new IArchiveAccess[classpath.length];
-		for (int i = 0; i < classpath.length; i++)
-			access[i] = getArchiveAccess(new File(classpath[i]));
-		return new MultiArchiveAccess(access);
+		List<IArchiveAccess> access = new ArrayList<>();
+		for (String cp : classpath) {
+			File classFile = new File(cp);
+			if (!classFile.exists()) continue;
+			access.add(getArchiveAccess(classFile));
+		}
+		return new MultiArchiveAccess(access.toArray(IArchiveAccess[]::new));
 	}
 	
 	public static IArchiveAccess getArchiveAccess(File archivePath) throws IOException {
