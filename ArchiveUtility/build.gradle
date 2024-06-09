@@ -3,20 +3,21 @@ apply plugin: 'java'
 apply plugin: 'maven-publish'
 
 group = 'com.github.M-Marvin'
-version = '0.1'
+version = '1.0'
 
-// Add additional content to the manifest
-tasks.named('jar') {
+jar {
     manifest {
-        attributes('Implementation-Version': version,
-                   'Implementation-Title': project.name,
-                   'Implementation-Vendor-Id': 'de.m_marvin')
+        attributes 'Implementation-Version': version
+        attributes 'Implementation-Title': 'Archive Utility'
+        attributes 'Implementation-Vendor-Id': 'de.m_marvin'
     }
 }
 
 java {
     withSourcesJar()
 }
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 publishing {
     publications {
