@@ -1,38 +1,54 @@
 package de.m_marvin.archiveutility;
 
 import java.io.IOException;
-import java.io.InputStream;
 
 public class Testing {
 
 	public static void main(String... test) throws IOException {
 		
-		ArchiveUtility utility = new ArchiveUtility(Testing.class);
+		testClassJarAccess();
+		testClasspathBrowsing();
 		
-		System.out.println(utility.getArchivePath());;
-		System.out.println(utility.isInArchive() ? "In Archive" : "In Folder");
+	}
+	
+	public static void testClassJarAccess() {
+		
+		try {
+			
+			IArchiveAccess access1 = ArchiveAccess.getJarAccessForClass(Testing.class);
+			IArchiveAccess access2 = ArchiveAccess.getJarAccessForClass(ArchiveAccess.class);
 
-		for (String item : utility.list("test/")) {
+			System.out.println("\naccess1:");
+			for (String s : access1.listFull()) {
+				System.out.println(s);
+			}
 			
-			System.out.println("-> " + item);
+			System.out.println("\naccess2:");
+			for (String s : access2.listFull()) {
+				System.out.println(s);
+			}
 			
-		}
-		System.out.println("---");
-		for (String item : utility.listFiles("test/")) {
-			
-			System.out.println("-> " + item);
-			
-		}
-		System.out.println("---");
-		for (String item : utility.listFolders("test/")) {
-			
-			System.out.println("-> " + item);
-			
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 		
-		InputStream is = utility.openFile("test/subfolder/test2.txt");
-		System.out.println(is);
-		is.close();
+	}
+	
+	public static void testClasspathBrowsing() {
+		
+		try {
+
+			IArchiveAccess access = ArchiveAccess.getClasspathAccess();
+			
+			System.out.println("\nclasspath files:");
+			for (String entry: access.listFull()) {
+				System.out.println(entry);
+			}
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
 	}
 	
 }
