@@ -22,14 +22,14 @@ public class FileSystemAccess implements IArchiveAccess {
 	
 	@Override
 	public InputStream open(String path) throws IOException {
-		File file = new File(path);
+		File file = new File(this.root, path);
 		if (!file.isFile()) throw new IOException("fs entry not found: " + path);
 		return new FileInputStream(file);
 	}
 
 	@Override
 	public boolean isFile(String path) {
-		File file = new File(path);
+		File file = new File(this.root, path);
 		return file.isFile();
 	}
 	
