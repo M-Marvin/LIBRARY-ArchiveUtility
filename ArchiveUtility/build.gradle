@@ -2,7 +2,6 @@
 apply plugin: 'java'
 apply plugin: 'maven-publish'
 
-group = 'com.github.M-Marvin'
 version = '2.1'
 
 jar {
@@ -20,15 +19,22 @@ java {
 }
 
 publishing {
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/m-marvin/library-archiveutility")
+            credentials {
+                username = project.findProperty("gpr.user") ?: System.getenv("GITHUB_ACTOR")
+                password = project.findProperty("gpr.key") ?: System.getenv("GITHUB_TOKEN")
+            }
+        }
+    }
     publications {
         maven(MavenPublication) {
+            groupId = 'de.m_marvin.archiveutility'
+        	artifactId = "archiveutility"
+        	
 			from components.java
         }
     }
-}
-
-// Specify gradle version to use for jitpack
-wrapper {
-    gradleVersion = "7.4.2"
-    distributionType = Wrapper.DistributionType.ALL
 }
