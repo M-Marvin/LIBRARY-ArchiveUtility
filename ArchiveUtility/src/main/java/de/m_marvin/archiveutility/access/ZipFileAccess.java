@@ -1,18 +1,42 @@
 package de.m_marvin.archiveutility.access;
 
+import java.io.Closeable;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import de.m_marvin.archiveutility.IArchiveAccess;
+public class ZipFileAccess implements IArchiveAccess, Closeable {
 
-public class ZipFileAccess implements IArchiveAccess {
-
-	private ZipFile zip;
+	private final ZipFile zip;
+	private final URL location;
 	
+	public ZipFileAccess(ZipFile zipFile, URL location) {
+		this.zip = zipFile;
+		this.location = location;
+	}
+
+	public ZipFileAccess(URL location) throws IOException {
+		this.zip = new ZipFile(location.getPath());
+		this.location = location;
+	}
+
+	public ZipFileAccess(File file) throws IOException {
+		this.zip = new ZipFile(file);
+		this.location = file.toURI().toURL();
+	}
+
 	public ZipFileAccess(ZipFile zipFile) {
 		this.zip = zipFile;
+		this.location = null;
+	}
+
+	@Override
+	public void close() throws IOException {
+		this.zip.close();
 	}
 	
 	private static String formatZipEntry(String path) {
@@ -39,6 +63,13 @@ public class ZipFileAccess implements IArchiveAccess {
 		String p = formatZipEntry(path);
 		ZipEntry entry = this.zip.getEntry(p);
 		return entry != null && !entry.isDirectory();
+	}
+	
+	@Override
+	public boolean exists(String path) {
+		String p = formatZipEntry(path);
+		ZipEntry entry = this.zip.getEntry(p);
+		return entry != null;
 	}
 	
 	@Override
@@ -102,6 +133,18 @@ public class ZipFileAccess implements IArchiveAccess {
 				.distinct()
 				.map(ZipFileAccess::formatFileSystem)
 				.toArray(i -> new String[i]);
+	}
+	
+	@Override
+	public URL getURL(String path) throws MalformedURLException {
+		if (this.location == null) return null;
+		return new URL(this.location.getProtocol(), this.location.getHost(), this.location.getPort(), new File(new File(this.location.getPath()), path).getPath());
+	}
+	
+	@Override
+	public URL getRootURL(String path) throws MalformedURLException {
+		if (this.location == null) return null;
+		return this.location;
 	}
 	
 }

@@ -4,13 +4,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
 import java.util.stream.Stream;
-
-import de.m_marvin.archiveutility.IArchiveAccess;
 
 public class FileSystemAccess implements IArchiveAccess {
 
@@ -19,6 +19,9 @@ public class FileSystemAccess implements IArchiveAccess {
 	public FileSystemAccess(File rootFolder) {
 		this.root = rootFolder;
 	}
+	
+	@Override
+	public void close() throws IOException {}
 	
 	@Override
 	public InputStream open(String path) throws IOException {
@@ -31,6 +34,12 @@ public class FileSystemAccess implements IArchiveAccess {
 	public boolean isFile(String path) {
 		File file = new File(this.root, path);
 		return file.isFile();
+	}
+	
+	@Override
+	public boolean exists(String path) {
+		File file = new File(this.root, path);
+		return file.exists();
 	}
 	
 	@Override
@@ -91,4 +100,14 @@ public class FileSystemAccess implements IArchiveAccess {
 				.toArray(String[]::new);
 	}
 
+	@Override
+	public URL getURL(String path) throws MalformedURLException {
+		return new File(this.root, path).toURI().toURL();
+	}
+	
+	@Override
+	public URL getRootURL(String path) throws MalformedURLException {
+		return this.root.toURI().toURL();
+	}
+	
 }

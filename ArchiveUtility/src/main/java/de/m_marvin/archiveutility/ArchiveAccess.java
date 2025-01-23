@@ -9,10 +9,15 @@ import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
 import de.m_marvin.archiveutility.access.FileSystemAccess;
+import de.m_marvin.archiveutility.access.IArchiveAccess;
 import de.m_marvin.archiveutility.access.MultiArchiveAccess;
 import de.m_marvin.archiveutility.access.ZipFileAccess;
 
 public class ArchiveAccess {
+
+	private ArchiveAccess() {
+		throw new UnsupportedOperationException();
+	}
 	
 	public static IArchiveAccess getJarAccessForClass(Class<?> clazz) throws IOException {
 		try {

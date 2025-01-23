@@ -1,6 +1,11 @@
 package de.m_marvin.archiveutility;
 
 import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
+import de.m_marvin.archiveutility.access.IArchiveAccess;
+import de.m_marvin.archiveutility.classes.ArchiveClasses;
 
 public class Testing {
 
@@ -34,6 +39,16 @@ public class Testing {
 		
 	}
 	
+	@TTT
+	public static class Test {
+		
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	public static @interface TTT {
+		
+	}
+	
 	public static void testClasspathBrowsing() {
 		
 		try {
@@ -42,6 +57,11 @@ public class Testing {
 			
 			System.out.println("\nclasspath files:");
 			for (String entry: access.listFull()) {
+				System.out.println(entry);
+			}
+
+			System.out.println("\nclasspath files:");
+			for (Class<?> entry: ArchiveClasses.getTypesAnnotatedWith(TTT.class)) {
 				System.out.println(entry);
 			}
 			
