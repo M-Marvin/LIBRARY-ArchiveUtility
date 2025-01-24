@@ -3,6 +3,7 @@ package de.m_marvin.archiveutility;
 import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.net.URL;
 
 import de.m_marvin.archiveutility.access.IArchiveAccess;
 import de.m_marvin.archiveutility.classes.ArchiveClasses;
@@ -10,9 +11,19 @@ import de.m_marvin.archiveutility.classes.ArchiveClasses;
 public class Testing {
 
 	public static void main(String... test) throws IOException {
+
+		//System.out.println(Testing.class.getResource("Testing.class"));
 		
-		testClassJarAccess();
-		testClasspathBrowsing();
+		URL jarURL = new URL("file:/C:/Users/marvi/Desktop/test.jar");
+		URL fileURL = new URL("jar", "", jarURL.toString() + "!/" + "de/m_marvin/archiveutility/Testing.class");
+		
+		URL url = new URL("jar:file:/C:/Users/marvi/Desktop/test.jar!/de/m_marvin/archiveutility/Testing.class");
+		
+		System.out.println(url);
+		System.out.println(fileURL);
+		
+//		testClassJarAccess();
+//		testClasspathBrowsing();
 		
 	}
 	

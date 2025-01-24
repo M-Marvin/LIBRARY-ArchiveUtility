@@ -138,7 +138,7 @@ public class ZipFileAccess implements IArchiveAccess, Closeable {
 	@Override
 	public URL getURL(String path) throws MalformedURLException {
 		if (this.location == null) return null;
-		return new URL(this.location.getProtocol(), this.location.getHost(), this.location.getPort(), new File(new File(this.location.getPath()), path).getPath());
+		return new URL("jar", "", this.location.toString() + "!/" + path);
 	}
 	
 	@Override
